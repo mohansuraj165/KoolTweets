@@ -18,11 +18,16 @@ namespace KoolTweets.Controllers
     {
         public ActionResult Index()
         {
-            
             return View();
         }
 
-        
+        /// <summary>
+        /// Gett all tweets with time stamp falling in range start and end date
+        /// Validates input parameters
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns>Json object with data and/or appropriate message</returns>
         public JsonResult GetAllTweets(DateTime start, DateTime end)
         {
             if(start>DateTime.Now || end>DateTime.Now)
@@ -32,18 +37,21 @@ namespace KoolTweets.Controllers
 
             List<Tweet> tweetStr = new List<Tweet>();
             var watch = new System.Diagnostics.Stopwatch();
-
-            watch.Start();
+            
             tweetStr =GetTweets(start,end);
-            watch.Stop();
-            ViewBag.Time = watch.ElapsedMilliseconds;
+
             return Json(new { success = true, data = tweetStr }, JsonRequestBehavior.AllowGet);
         }
 
+        /// <summary>
+        /// Function responsible for making the actual API call to get tweets
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <returns>List of Tweet objects</returns>
         public List<Tweet> GetTweets(DateTime start, DateTime end)
         {
             List<Tweet> tweets = new List<Tweet>();
-            List<string> tweetStr = new List<string>();
             string URL = String.Format("https://badapi.iqvia.io/api/v1/Tweets?startDate={0}&endDate={1}",start,end);
 
             WebRequest request = WebRequest.Create(URL);
@@ -58,16 +66,6 @@ namespace KoolTweets.Controllers
                 result = sr.ReadToEnd();
                 tweets = JsonConvert.DeserializeObject<List<Tweet>>(result);
                 sr.Close();
-            }
-
-            //foreach (Tweet t in tweets)
-            //{
-            //    tweetStr.Add(JsonConvert.SerializeObject(t));
-            //}
-            if (tweets.Count==100)
-            {
-                DateTime newStartDate = tweets[99].stamp;
-                tweets.AddRange( GetTweets(newStartDate, end));
             }
             return tweets;
         }
