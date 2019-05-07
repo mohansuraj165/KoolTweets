@@ -1,5 +1,6 @@
 ﻿var isInitialized
-const MaxRecordSize=100
+const MaxRecordSize = 100
+var totalRecordsFetched = 0
 $(function () {
     if (isInitialized != true) {
         init()
@@ -21,6 +22,7 @@ function init() {
  * Gets tweets data displays it.
  */ 
 function getTweets() {
+    totalRecordsFetched=0
     ResetDisplay()
     var startDate = $("#startDate").val()
     var endDate = $("#endDate").val()
@@ -65,16 +67,14 @@ function GetTweetsAPI(startDate, endDate) {
  * Performs the succes actions of 'GetAllTweets' call
  */
 function GetTweetsSuccessAction(data, endDate) {
-    if (data.data.length == 0)
-        DisplayError("No records found for this time frame")
-    else {
-        PopulateTweetData(data.data)
 
-        if (data.data.length == MaxRecordSize) {
-            var newStart = data.data[MaxRecordSize - 1].stamp;
-            GetTweetsAPI(newStart, endDate)
-        }
+    totalRecordsFetched += data.data.length;
+    PopulateTweetData(data.data)
+
+    if (data.isMoreTweets == true) {
+        GetTweetsAPI(data.newStart, endDate)
     }
+
 }
 
 /**
@@ -93,6 +93,16 @@ function PopulateTweetData(data) {
         tbody.append(tr)
     });
     table.append(tbody);
+    UpdateRecordsFetched()
+}
+
+/**
+ * Displays the total dumber of records fetched
+ */
+function UpdateRecordsFetched() {
+    $("#countNDownload").removeClass("hidden")
+    $("#recordsCount").empty()
+    $("#recordsCount").append('<p>Total:'+totalRecordsFetched+'</p>')
 }
 
 /**
@@ -113,6 +123,7 @@ function DisplayError(msg) {
 function ResetDisplay() {
     $("#tweetsTable").empty().addClass("hidden")
     $("#userMessage").empty()
+    $("#countNDownload").addClass("hidden")
 }
 
 /**
@@ -121,9 +132,26 @@ function ResetDisplay() {
  */
 function AddHeaderToTable() {
     var tableDiv = $("#tweetsTable")
-    var table = $("<table></table>").addClass("table table-bordered table-striped")
+    var table = $("<table id='tab'></table>").addClass("table table-bordered table-striped")
     var thead = $("<thead></thead>")
     thead.append("<td>ID</td><td>Time Stamp</td><td>Message</td>")
     table.append(thead)
     tableDiv.append(table);
+}
+
+/**
+ * Downloads the tweets table as CSV file
+ */
+function downloadCSV() {
+    let options = {
+        "separator": ",",
+        "newline": "\n",
+        "quoteFields": true,
+        "excludeColumns": "",
+        "excludeRows": "",
+        "trimContent": true,
+        "filename": "TweetsTable.csv",
+        "appendTo": "#output"
+    }
+    $("#tweetsTable table").table2csv("download", options);
 }

@@ -208,6 +208,7 @@
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\parsley.js" />
     <Content Include="Scripts\parsley.min.js" />
+    <Content Include="Scripts\table2csv.js" />
     <Content Include="Scripts\tweets.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">

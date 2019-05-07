@@ -40,7 +40,8 @@ namespace KoolTweets
                       "~/Content/site.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/tweet").Include(
-                      "~/Scripts/tweets.js"));
+                      "~/Scripts/tweets.js",
+                      "~/Scripts/table2csv.js"));
         }
     }
 }
